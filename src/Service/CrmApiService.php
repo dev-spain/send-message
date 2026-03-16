@@ -6,7 +6,6 @@ use DateTime;
 use Psr\Log\LoggerInterface;
 use RetailCrm\Api\Client;
 use RetailCrm\Api\Factory\SimpleClientFactory;
-use RetailCrm\Api\Interfaces\ClientFactory;
 use RetailCrm\Api\Model\Entity\Orders\Order;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use RetailCrm\Api\Interfaces\ApiExceptionInterface;
@@ -36,21 +35,33 @@ class CrmApiService
         $this->client = SimpleClientFactory::createClient($apiUrl, $apiKey);
     }
 
-    public function getOrders(DateTime $date, string $dateField)
+    public function getOrders(DateTime $date)
     {
-        $stateField = $this->params->get('crm.state_field');
+        /*
+        $minDateTimeString = $date->format('Y-m-d H:00:00');
+        $maxDateTimeString = (
+                new \DateTime($date->format('Y-m-d H:00:00') . ' + 1 hour - 1 minute')
+            )->format('Y-m-d H:i:00');
+        */
+
+        $minTimeString = filter_var($date->format('H:00:00'), FILTER_SANITIZE_NUMBER_INT);
+        $maxTimeString = filter_var((
+            new \DateTime($date->format('H:00:00') . ' + 1 hour - 1 minute')
+            )->format('H:i:00'), FILTER_SANITIZE_NUMBER_INT);
 
         $request = new OrdersRequest();
-        $request->limit = 20;
+        $request->limit = 100;
         $request->page = 1;
 
         $request->filter = new OrderFilter();
+        $request->filter->extendedStatus = ['new'];
+        //$request->filter->createdAtFrom = $minDateTimeString;
+        //$request->filter->createdAtTo = $maxDateTimeString;
         $request->filter->customFields = [
-            $dateField => [
+            'cita1' => [
                 'min' => $date->format('Y-m-d'),
                 'max' => $date->format('Y-m-d'),
             ],
-            $stateField => 'new',
         ];
 
         do {
@@ -79,24 +90,30 @@ class CrmApiService
                 break;
             }
 
-            foreach ($response->orders as $order) {
-                $this->logger->debug(__METHOD__ . ': ' . 'yield order #' . $order->id);
+            $this->logger->info(__METHOD__ . ': ' . 'tomorrow orders count: ' . count($response->orders));
 
-                yield $order;
+            foreach ($response->orders as $order) {
+                //if ($order->createdAt->format('Y-m-d H:00:00') === $minDateTimeString) {
+                if (
+                    filter_var(mb_substr($order->customFields['hora'], 0, 8), FILTER_SANITIZE_NUMBER_INT) >= $minTimeString
+                    && filter_var(mb_substr($order->customFields['hora'], 0, 8), FILTER_SANITIZE_NUMBER_INT) <= $maxTimeString
+                ) {
+                    $this->logger->debug(__METHOD__ . ': ' . 'yield order #' . $order->createdAt->format('Y-m-d H:i:s'));
+
+                    yield $order;
+                }
             }
 
             ++$request->page;
         } while ($response->pagination->currentPage < $response->pagination->totalPageCount);
     }
 
-    public function setStateToOrder($processedOrder, $state)
+    public function setStatusToOrder($processedOrder)
     {
-        $stateField = $this->params->get('crm.state_field');
+        $sendStatus = $this->params->get('crm.send_status');
 
-        $order                 = new Order();
-        $order->customFields   = [
-            $stateField => $state
-        ];
+        $order         = new Order();
+        $order->status = $sendStatus;
 
         $request        = new OrdersEditRequest();
         $request->by    = ByIdentifier::ID;
