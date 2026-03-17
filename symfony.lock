@@ -2,9 +2,6 @@
     "civicrm/composer-compile-plugin": {
         "version": "v0.15"
     },
-    "clue/stream-filter": {
-        "version": "v1.5.0"
-    },
     "doctrine/annotations": {
         "version": "1.13",
         "recipe": {
@@ -56,20 +53,11 @@
             "config/packages/nyholm_psr7.yaml"
         ]
     },
-    "php-http/curl-client": {
-        "version": "2.2.1"
-    },
     "php-http/discovery": {
         "version": "1.14.1"
     },
     "php-http/httplug": {
         "version": "2.2.0"
-    },
-    "php-http/message": {
-        "version": "1.12.0"
-    },
-    "php-http/message-factory": {
-        "version": "v1.0.2"
     },
     "php-http/promise": {
         "version": "1.1.0"

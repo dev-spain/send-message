@@ -5,6 +5,7 @@
     "prefer-stable": true,
     "require": {
         "php": ">=7.2.5",
+        "doctrine/annotations": "1.13.*",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "retailcrm/api-client-php": "~6.0",
@@ -22,8 +23,10 @@
     "config": {
         "allow-plugins": {
             "composer/package-versions-deprecated": true,
+            "civicrm/composer-compile-plugin": true,
             "symfony/flex": true,
-            "symfony/runtime": true
+            "symfony/runtime": true,
+            "php-http/discovery": true
         },
         "optimize-autoloader": true,
         "preferred-install": {
@@ -66,6 +69,7 @@
             "allow-contrib": false,
             "require": "5.4.*"
         },
+        "compile-mode": "whitelist",
         "compile-whitelist": ["retailcrm/api-client-php"]
     }
 }
