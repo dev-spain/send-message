@@ -5,14 +5,17 @@
     "prefer-stable": true,
     "require": {
         "php": ">=7.2.5",
-        "doctrine/annotations": "1.13.*",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "doctrine/annotations": "1.13.*",
+        "nyholm/psr7": "^1.4",
+        "php-http/message-factory": "^1.1",
         "retailcrm/api-client-php": "~6.0",
         "symfony/console": "5.4.*",
         "symfony/dotenv": "5.4.*",
         "symfony/flex": "^1.17|^2",
         "symfony/framework-bundle": "5.4.*",
+        "symfony/http-client": "^5.4",
         "symfony/monolog-bundle": "^3.7",
         "symfony/runtime": "5.4.*",
         "symfony/yaml": "5.4.*"
